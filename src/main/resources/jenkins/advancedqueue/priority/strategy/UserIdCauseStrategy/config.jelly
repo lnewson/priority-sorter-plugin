@@ -1,3 +1,8 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
 	<st:include page="config.jelly" class="jenkins.advancedqueue.priority.strategy.AbstractStaticPriorityStrategy" />
+	<f:optionalBlock name="useSpecificUser" title="Job triggered by a specific user"  checked="${instance.useSpecificUser}" inline="true">
+		<f:entry title="User ID" field="userId">
+			<f:combobox/>
+		</f:entry>
+	</f:optionalBlock>
 </j:jelly>

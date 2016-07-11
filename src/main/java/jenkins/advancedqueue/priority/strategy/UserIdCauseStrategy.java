@@ -27,6 +27,8 @@ import hudson.Extension;
 import hudson.model.Cause;
 import hudson.model.Cause.UserIdCause;
 import hudson.model.Queue;
+import hudson.model.User;
+import hudson.util.ComboBoxModel;
 
 import java.util.List;
 
@@ -45,11 +47,31 @@ public class UserIdCauseStrategy extends AbstractStaticPriorityStrategy {
 			super("Job Triggered by a User");
 		}
 
+		public ComboBoxModel doFillUserIdItems() {
+			ComboBoxModel items = new ComboBoxModel();
+			for (User user : User.getAll()) {
+				items.add(user.getId());
+			}
+			return items;
+		}
 	}
 
+	private String userId;
+	private boolean useSpecificUser;
+
 	@DataBoundConstructor
-	public UserIdCauseStrategy(int priority) {
+	public UserIdCauseStrategy(int priority, String userId, Boolean useSpecificUser) {
 		setPriority(priority);
+		this.userId = userId;
+		this.useSpecificUser = useSpecificUser != null && useSpecificUser;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public boolean isUseSpecificUser() {
+		return useSpecificUser;
 	}
 
 	@Override
@@ -57,7 +79,14 @@ public class UserIdCauseStrategy extends AbstractStaticPriorityStrategy {
 		List<Cause> causes = item.getCauses();
 		for (Cause cause : causes) {
 			if (cause.getClass() == UserIdCause.class) {
-				return true;
+				if (useSpecificUser) {
+					UserIdCause userIdCause = (UserIdCause) cause;
+					if (userIdCause.getUserId() != null && userIdCause.getUserId().equals(userId)) {
+						return true;
+					}
+				} else {
+					return true;
+				}
 			}
 		}
 		return false;
